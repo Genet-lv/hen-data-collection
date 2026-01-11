@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hen Database - Weekly Egg Production & Sales Report</title>
+  <script src="https://unpkg.com/jspsych@7.3.0"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-html-button-response"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-survey-html-form"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-call-function"></script>
+  <link href="https://unpkg.com/jspsych@7.3.0/css/jspsych.css" rel="stylesheet" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 20px;
+    }
+    #jspsych-target {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .welcome-card {
+      background: #fff;
+      padding: 30px;
+      border-radius: 8px;
+      color: #333;
+      text-align: center;
+    }
+    .welcome-card h1 {
+      font-size: 2rem;
+      margin-bottom: 15px;
+      color: #2c5f2d;
+    }
+    .welcome-card p {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-bottom: 15px;
+    }
+    
+    .form-section {
+      background: #fafafa;
+      padding: 25px;
+      margin: 20px 0;
+      border-radius: 8px;
+      border-left: 4px solid #2c5f2d;
+    }
+    
+    .form-section h3 {
+      color: #2c5f2d;
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-size: 1.3rem;
+    }
+    
+    .progress-indicator {
+      background: #e8f5e9;
+      padding: 10px 20px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      text-align: center;
+      font-weight: bold;
+      color: #2c5f2d;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #333;
+      font-size: 0.95rem;
+    }
+    
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 1rem;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+    
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      outline: none;
+      border-color: #2c5f2d;
+      box-shadow: 0 0 0 2px rgba(44, 95, 45, 0.1);
+    }
+    
+    .form-group input[readonly] {
+      background-color: #f0f0f0;
+      cursor: not-allowed;
+    }
+    
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+    
+    .calculated-field {
+      background-color: #e8f5e9;
+      padding: 12px;
+      border-radius: 5px;
+      margin: 15px 0;
+      border-left: 3px solid #2c5f2d;
+    }
+    
+    .calculated-field strong {
+      color: #2c5f2d;
+    }
+    
+    .warning {
+      background-color: #fff3cd;
+      border-left: 4px solid #ffc107;
+      padding: 12px;
+      margin: 15px 0;
+      border-radius: 5px;
+      color: #856404;
+    }
+    
+    .error {
+      background-color: #f8d7da;
+      border-left: 4px solid #dc3545;
+      padding: 12px;
+      margin: 15px 0;
+      border-radius: 5px;
+      color: #721c24;
+    }
+    
+    .expense-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    
+    .expense-table th, .expense-table td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    
+    .expense-table th {
+      background-color: #2c5f2d;
+      color: white;
+      font-weight: 600;
+    }
+    
+    .expense-table input {
+      width: 100%;
+      padding: 5px;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+    }
+    
+    .btn-secondary {
+      font-size: 0.9rem !important;
+      padding: 8px 20px !important;
+      border-radius: 5px !important;
+      background-color: #6c757d !important;
+      color: white !important;
+      border: none !important;
+      cursor: pointer;
+      margin: 5px !important;
+    }
+    
+    .btn-secondary:hover {
+      background-color: #5a6268 !important;
+    }
+    
+    .jspsych-btn {
+      font-size: 1.1rem !important;
+      padding: 12px 30px !important;
+      border-radius: 6px !important;
+      background-color: #2c5f2d !important;
+      color: white !important;
+      border: none !important;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin: 10px 5px !important;
+    }
+    .jspsych-btn:hover {
+      background-color: #1f4320 !important;
+    }
+    
+    .summary-box {
+      background: #e8f5e9;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+    
+    .summary-box h4 {
+      color: #2c5f2d;
+      margin-top: 0;
+    }
+    
+    .summary-table {
+      width: 100%;
+      margin-top: 10px;
+    }
+    
+    .summary-table td {
+      padding: 8px 0;
+    }
+    
+    .summary-table td:first-child {
+      font-weight: 600;
+      color: #555;
+    }
+    
+    @media (max-width: 768px) {
+      #jspsych-target {
+        padding: 15px;
+      }
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="jspsych-target"></div>
+
+  <script>
+    // --- CONFIG ---
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx01uoXJq4EDdVwq45lSYogwlqVUrPVrre4mvO_PWSWCorAOohm3SZwTMlTwDOtaoZH/exec";
+
+    const jsPsych = initJsPsych({ display_element: 'jspsych-target' });
+    
+    // Store data
+    let weeklyData = [];
+    let expenseRows = []; // Expense entries
+    let depositRows = []; // Deposit entries
+    
+    // Load saved draft from localStorage
+    function loadDraft() {
+      const saved = localStorage.getItem('henDataDraft');
+      if (saved) {
+        const draft = JSON.parse(saved);
+        weeklyData = draft.weeklyData || [];
+        expenseRows = draft.expenseRows || [];
+        depositRows = draft.depositRows || [];
+        return draft.projectInfo || null;
+      }
+      return null;
+    }
+    
+    // Save draft to localStorage
+    function saveDraft(projectInfo = null) {
+      const draft = {
+        projectInfo,
+        weeklyData,
+        expenseRows,
+        depositRows,
+        timestamp: new Date().toISOString()
+      };
+      localStorage.setItem('henDataDraft', JSON.stringify(draft));
+    }
+    
+    // Clear draft after successful submission
+    function clearDraft() {
+      localStorage.removeItem('henDataDraft');
+    }
+    
+    // Validation functions
+    function validateWeekData(data) {
+      const warnings = [];
+      const errors = [];
+      
+      const numChickens = Number(data.num_chickens);
+      const eggsLaid = Number(data.eggs_laid);
+      const eggsBroken = Number(data.eggs_broken);
+      const eggsSold = Number(data.eggs_sold);
+      const mortality = Number(data.mortality || 0);
+      
+      // Check for unusual values
+      if (eggsBroken > eggsLaid) {
+        errors.push("Eggs broken cannot exceed eggs laid!");
+      }
+      
+      const percentLaying = (eggsLaid / (numChickens * 7)) * 100;
+      if (percentLaying > 100) {
+        warnings.push(`Laying rate is ${percentLaying.toFixed(1)}% - this seems unusually high!`);
+      }
+      
+      if (percentLaying < 30 && numChickens > 0) {
+        warnings.push(`Laying rate is only ${percentLaying.toFixed(1)}% - check hen health.`);
+      }
+      
+      if (mortality > numChickens * 0.1) {
+        warnings.push(`${mortality} deaths is high (>${(numChickens * 0.1).toFixed(0)}) - investigate cause.`);
+      }
+      
+      return { warnings, errors };
+    }
+    
+    // Auto-calculation functions
+    function calculatePercentLaying(eggsLaid, numChickens) {
+      if (numChickens === 0) return 0;
+      return ((eggsLaid / (numChickens * 7)) * 100).toFixed(2);
+    }
+    
+    function calculateClosingStock(eggsFromPrevious, eggsLaid, eggsSold, eggsBroken) {
+      return Number(eggsFromPrevious) + Number(eggsLaid) - Number(eggsSold) - Number(eggsBroken);
+    }
+    
+    function calculateRevenue(eggsSold, price) {
+      return (Number(eggsSold) * Number(price)).toFixed(2);
+    }
+    
+    // Export to CSV
+    function exportToCSV() {
+      const allData = jsPsych.data.get().values();
+      const projectInfo = allData.find(d => d.response?.project_name)?.response || {};
+      
+      let csv = "Hen Production Report\n\n";
+      csv += `Project: ${projectInfo.project_name}\n`;
+      csv += `Month: ${projectInfo.month_year}\n\n`;
+      
+      csv += "Week,Dates,Chickens,Batch,Eggs Laid,Broken,Sold,Price,Revenue,Closing Stock,% Laying,Mortality\n";
+      
+      weeklyData.forEach(w => {
+        csv += `${w.week},${w.week_dates},${w.num_chickens},${w.batch_number || ''},${w.eggs_laid},${w.eggs_broken},${w.eggs_sold},${w.egg_price},${w.revenue},${w.closing_stock},${w.percent_laying},${w.mortality || 0}\n`;
+      });
+      
+      csv += "\n\nExpenses\n";
+      csv += "Date,Category,Description,Amount (Birr),Feed Used (kg),Feed in Store (kg),Notes\n";
+      expenseRows.forEach(e => {
+        csv += `${e.date},${e.category || ''},${e.description || ''},${e.amount || 0},${e.feed_used || 0},${e.feed_in_store || 0},${e.notes || ''}\n`;
+      });
+      
+      csv += "\n\nBank Deposits\n";
+      csv += "Date,Amount (Birr),Reference,Depositor Name,Notes\n";
+      depositRows.forEach(d => {
+        csv += `${d.date},${d.amount || 0},${d.reference || ''},${d.depositor_name || ''},${d.notes || ''}\n`;
+      });
+      
+      // Create download
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `hen_report_${projectInfo.project_name}_${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+    }
+
+    async function saveToGoogleSheets(projectData) {
+      try {
+        await fetch(GOOGLE_SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(projectData)
+        });
+        return { success: true, message: "Data saved successfully to Google Sheets!" };
+      } catch (e) {
+        console.error("Save error:", e);
+        return { success: false, message: e.message };
+      }
+    }
+
+    function calculateWeekDates(weekNumber) {
+      if (!window.selectedMonthYear) return '';
+      
+      const [year, month] = window.selectedMonthYear.split('-');
+      const monthNum = parseInt(month);
+      
+      // Get days in month
+      const daysInMonth = new Date(parseInt(year), monthNum, 0).getDate();
+      
+      // Calculate week ranges
+      let startDay, endDay;
+      
+      if (weekNumber === 1) {
+        startDay = 1;
+        endDay = 7;
+      } else if (weekNumber === 2) {
+        startDay = 8;
+        endDay = 14;
+      } else if (weekNumber === 3) {
+        startDay = 15;
+        endDay = 21;
+      } else if (weekNumber === 4) {
+        startDay = 22;
+        endDay = daysInMonth; // Automatically adjusts to 28, 29, 30, or 31
+      }
+      
+      // Format: dd-dd/mm
+      const startStr = startDay.toString().padStart(2, '0');
+      const endStr = endDay.toString().padStart(2, '0');
+      const monthStr = monthNum.toString().padStart(2, '0');
+      
+      return `${startStr}-${endStr}/${monthStr}`;
+    }
+    
+    function createTimeline() {
+      const timeline = [];
+      const savedDraft = loadDraft();
+      window.selectedMonthYear = savedDraft?.month_year || '';
+
+      // Welcome Screen
+      timeline.push({
+        type: jsPsychHtmlButtonResponse,
+        stimulus: `
+          <div class="welcome-card">
+            <h1>🐔 Hen Database Collection System</h1>
+            <p>Weekly Egg Production & Sales Report</p>
+            ${savedDraft ? '<div class="warning">📋 Saved draft found - Resume or start fresh</div>' : ''}
+            <p>Complete the form to record 4 weeks of egg production data, expenses, and generate monthly reports.</p>
+          </div>`,
+        choices: savedDraft ? ['Resume Draft', 'Start Fresh'] : ['Begin'],
+        on_finish: (data) => {
+          if (data.response === 1) {
+            clearDraft();
+            weeklyData = [];
+            expenseRows = [{}];
+          }
+        }
+      });
+
+      timeline.push({
+        type: jsPsychSurveyHtmlForm,
+        preamble: `
+          <div class="form-section">
+            <h3>📋 Project Information</h3>
+          </div>`,
+        html: `
+          <div class="form-group">
+            <label for="project_name">Name *</label>
+            <input name="project_name" type="text" required placeholder="e.g., HEN-2026-001" 
+                   value="${savedDraft?.project_name || ''}" />
+          </div>
+          <div class="form-group">
+            <label for="month_year">Month & Year *</label>
+            <input name="month_year" type="month" required 
+                   value="${savedDraft?.month_year || ''}" />
+          </div>
+          <div class="form-group">
+            <label for="opening_stock">Opening Stock (Eggs from Previous Month) *</label>
+            <input name="opening_stock" type="number" required min="0" placeholder="0" 
+                   value="${savedDraft?.opening_stock || 0}" />
+            <small style="color: #666;">📦 Enter closing stock from last month (use 0 for first month)</small>
+          </div>`,
+        button_label: 'Continue to Weekly Data',
+        on_finish: (data) => {
+          window.selectedMonthYear = data.response.month_year;
+          window.openingStock = Number(data.response.opening_stock) || 0;
+          saveDraft(data.response);
+          jsPsych.getDisplayElement().innerHTML = '';
+        }
+      });
+
+      // Weekly Data Entry - 4 weeks
+      for (let week = 1; week <= 4; week++) {
+        timeline.push({
+          type: jsPsychHtmlButtonResponse,
+          stimulus: () => {
+            const prevWeek = weeklyData[week - 2];
+            return `
+              <div class="form-section">
+                <div class="progress-indicator">Week ${week} of 4</div>
+                <h3>📊 Week ${week}</h3>
+                ${prevWeek ? `
+                  <div class="calculated-field">
+                    Previous: ${prevWeek.eggs_laid} laid, ${prevWeek.eggs_sold} sold, ${prevWeek.percent_laying}% laying
+                  </div>
+                ` : ''}
+              </div>
+              <p>Choose option:</p>
+            `;
+          },
+          choices: week > 1 ? ['Enter Data Manually', 'Copy Previous Week'] : ['Enter Data'],
+          on_finish: (data) => {
+            if (data.response === 1 && week > 1) {
+              const prevWeek = weeklyData[week - 2];
+              weeklyData[week - 1] = { ...prevWeek, week: week, week_dates: '' };
+            }
+            jsPsych.getDisplayElement().innerHTML = '';
+          }
+        });
+        
+        timeline.push({
+          type: jsPsychSurveyHtmlForm,
+          preamble: `
+            <div class="form-section">
+              <div class="progress-indicator">Week ${week} of 4</div>
+              <h3>📊 Week ${week} Data Entry</h3>
+            </div>`,
+          html: () => {
+            const copiedData = weeklyData[week - 1] || {};
+            const prevStock = week > 1 ? (weeklyData[week - 2]?.closing_stock || 0) : (window.openingStock || 0);
+            
+            const weekDates = calculateWeekDates(week);
+            return `
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="week_dates">Week Dates (Auto-calculated) *</label>
+                  <input id="week_dates_${week}" name="week_dates" type="text" required readonly
+                         value="${weekDates}" 
+                         style="background-color: #f0f0f0; cursor: not-allowed;" />
+                  <small style="color: #666;">📅 Auto-generated based on selected month</small>
+                </div>
+              </div>
+              <div id="date_warning_${week}" style="margin-bottom: 10px;"></div>
+              
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="num_chickens">Number of Chickens (Start of Week) *</label>
+                  <input id="num_chickens_${week}" name="num_chickens" type="number" required min="0" 
+                         value="${copiedData.num_chickens || ''}" 
+                         oninput="updateCalculations${week}()" />
+                </div>
+                <div class="form-group">
+                  <label for="mortality">Mortality (Deaths This Week)</label>
+                  <input id="mortality_${week}" name="mortality" type="number" min="0" value="${copiedData.mortality || 0}" 
+                         oninput="updateCalculations${week}()" />
+                </div>
+              </div>
+              
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="eggs_laid">Number of Eggs Laid *</label>
+                  <input id="eggs_laid_${week}" name="eggs_laid" type="number" required min="0" 
+                         value="${copiedData.eggs_laid || ''}" 
+                         oninput="updateCalculations${week}()" />
+                </div>
+                <div class="form-group">
+                  <label for="eggs_broken">Number of Eggs Broken</label>
+                  <input id="eggs_broken_${week}" name="eggs_broken" type="number" min="0" value="${copiedData.eggs_broken || 0}" 
+                         oninput="updateCalculations${week}()" />
+                </div>
+              </div>
+              
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="eggs_sold">Eggs Sold (#)</label>
+                  <input id="eggs_sold_${week}" name="eggs_sold" type="number" min="0" value="${copiedData.eggs_sold || 0}" 
+                         oninput="updateCalculations${week}()" />
+                </div>
+                <div class="form-group">
+                  <label for="egg_price">Egg Market Price (Birr) *</label>
+                  <input id="egg_price_${week}" name="egg_price" type="number" required min="0" step="0.01" 
+                         value="${copiedData.egg_price || ''}" 
+                         oninput="updateCalculations${week}()" />
+                </div>
+              </div>
+              
+              <input type="hidden" id="eggs_from_previous_${week}" name="eggs_from_previous" value="${prevStock}" />
+              
+              <div id="calculations_${week}" class="calculated-field">
+                <strong>📊 Auto-Calculated Values:</strong><br>
+                <span id="calc_display_${week}">Enter data to see calculations...</span>
+              </div>
+              
+              <div id="warnings_${week}"></div>
+              
+              <script type="text/javascript">
+                function updateCalculations${week}() {
+                  const numChickens = Number(document.getElementById('num_chickens_${week}').value) || 0;
+                  const eggsLaid = Number(document.getElementById('eggs_laid_${week}').value) || 0;
+                  const eggsBroken = Number(document.getElementById('eggs_broken_${week}').value) || 0;
+                  const eggsSold = Number(document.getElementById('eggs_sold_${week}').value) || 0;
+                  const price = Number(document.getElementById('egg_price_${week}').value) || 0;
+                  const mortality = Number(document.getElementById('mortality_${week}').value) || 0;
+                  const eggsFromPrev = ${prevStock};
+                  
+                  const maxPossibleEggs = numChickens * 7;
+                  const availableEggs = eggsFromPrev + eggsLaid - eggsBroken;
+                  const percentLaying = numChickens > 0 ? ((eggsLaid / (numChickens * 7)) * 100).toFixed(2) : 0;
+                  const closingStock = eggsFromPrev + eggsLaid - eggsSold - eggsBroken;
+                  const revenue = (eggsSold * price).toFixed(2);
+                  const mortalityRate = numChickens > 0 ? ((mortality / numChickens) * 100).toFixed(2) : 0;
+                  
+                  let display = 
+                    '• <strong>% Laying:</strong> ' + percentLaying + '% (based on ' + numChickens + ' hens × 7 days)<br>' +
+                    '• <strong>Revenue:</strong> Birr ' + revenue + ' (' + eggsSold + ' eggs × Birr ' + price + ')<br>' +
+                    '• <strong>Closing Stock:</strong> ' + closingStock + ' eggs (Previous: ' + eggsFromPrev + ' + Laid: ' + eggsLaid + ' - Sold: ' + eggsSold + ' - Broken: ' + eggsBroken + ')<br>' +
+                    '• <strong>Mortality Rate:</strong> ' + mortalityRate + '% (' + mortality + ' deaths)';
+                  
+                  document.getElementById('calc_display_${week}').innerHTML = display;
+                  
+                  // Validation warnings and errors
+                  let warnings = '';
+                  let hasErrors = false;
+                  
+                  if (eggsLaid > maxPossibleEggs && numChickens > 0) {
+                    warnings += '<div class="error">❌ ERROR: ' + eggsLaid + ' eggs exceeds maximum possible (' + maxPossibleEggs + ' eggs from ' + numChickens + ' hens × 7 days)!</div>';
+                    hasErrors = true;
+                  }
+                  if (eggsBroken > eggsLaid) {
+                    warnings += '<div class="error">❌ ERROR: Eggs broken (' + eggsBroken + ') cannot exceed eggs laid (' + eggsLaid + ')!</div>';
+                    hasErrors = true;
+                  }
+                  if (eggsSold > availableEggs && availableEggs >= 0) {
+                    warnings += '<div class="error">❌ ERROR: Eggs sold (' + eggsSold + ') exceeds available eggs (' + availableEggs + ')!</div>';
+                    hasErrors = true;
+                  }
+                  if (mortality > numChickens) {
+                    warnings += '<div class="error">❌ ERROR: Mortality (' + mortality + ') cannot exceed number of chickens (' + numChickens + ')!</div>';
+                    hasErrors = true;
+                  }
+                  if (closingStock < 0) {
+                    warnings += '<div class="error">❌ ERROR: Negative closing stock (' + closingStock + ') - check your numbers!</div>';
+                    hasErrors = true;
+                  }
+                  if (percentLaying > 100) {
+                    warnings += '<div class="warning">⚠️ WARNING: Laying rate over 100% is impossible!</div>';
+                  }
+                  if (percentLaying < 30 && numChickens > 0 && eggsLaid > 0) {
+                    warnings += '<div class="warning">⚠️ WARNING: Low laying rate ('+percentLaying+'%) - check hen health</div>';
+                  }
+                  if (mortalityRate > 5) {
+                    warnings += '<div class="warning">⚠️ WARNING: High mortality rate ('+mortalityRate+'%) - investigate cause</div>';
+                  }
+                  
+                  // Disable submit button if there are errors
+                  const submitBtn = document.querySelector('.jspsych-btn');
+                  if (submitBtn) {
+                    if (hasErrors) {
+                      submitBtn.disabled = true;
+                      submitBtn.style.opacity = '0.5';
+                      submitBtn.style.cursor = 'not-allowed';
+                    } else {
+                      submitBtn.disabled = false;
+                      submitBtn.style.opacity = '1';
+                      submitBtn.style.cursor = 'pointer';
+                    }
+                  }
+                  
+                  document.getElementById('warnings_${week}').innerHTML = warnings;
+                }
+                
+                // Run on load if data exists
+                setTimeout(updateCalculations${week}, 100);
+              <\/script>
+            `;
+          },
+          button_label: week < 4 ? 'Next Week →' : 'Continue to Expenses →',
+          on_finish: (data) => {
+            const prevStock = week > 1 ? (weeklyData[week - 2]?.closing_stock || 0) : (window.openingStock || 0);
+            const numChickens = Number(data.response.num_chickens);
+            const eggsLaid = Number(data.response.eggs_laid);
+            const eggsBroken = Number(data.response.eggs_broken);
+            const eggsSold = Number(data.response.eggs_sold);
+            const price = Number(data.response.egg_price);
+            const mortality = Number(data.response.mortality || 0);
+            
+            const percentLaying = calculatePercentLaying(eggsLaid, numChickens);
+            const closingStock = calculateClosingStock(prevStock, eggsLaid, eggsSold, eggsBroken);
+            const revenue = calculateRevenue(eggsSold, price);
+            const mortalityRate = numChickens > 0 ? ((mortality / numChickens) * 100).toFixed(2) : 0;
+            
+            weeklyData[week - 1] = {
+              week: week,
+              ...data.response,
+              eggs_from_previous: prevStock,
+              percent_laying: percentLaying,
+              closing_stock: closingStock,
+              revenue: revenue,
+              mortality_rate: mortalityRate
+            };
+            
+            saveDraft();
+            jsPsych.getDisplayElement().innerHTML = '';
+          }
+        });
+      }
+
+      // Simplified Expense Entry Table
+      timeline.push({
+        type: jsPsychSurveyHtmlForm,
+        preamble: `
+          <div class="form-section">
+            <h3>💰 Monthly Financial Transactions</h3>
+            <p>Record all expenses and bank deposits for the month.</p>
+          </div>`,
+        html: () => {
+          let html = `
+            <h4 style="color: #dc3545; margin-top: 20px;">📤 Expenses (Feed, Health, Rent, etc.)</h4>
+            <p style="color: #666; font-size: 0.9em; margin: 5px 0;">💡 Fill in "Feed Used" and "Feed in Store" only when category is Feed</p>
+            <table class="expense-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Category</th>
+                  <th>Description</th>
+                  <th>Amount (Birr)</th>
+                  <th>Feed Used (kg)</th>
+                  <th>Feed in Store (kg)</th>
+                  <th>Notes/Remarks</th>
+                </tr>
+              </thead>
+              <tbody>
+          `;
+          
+          // Generate 5 expense rows
+          for (let i = 0; i < 5; i++) {
+            const row = expenseRows[i] || {};
+            html += `
+              <tr>
+                <td><input type="date" name="exp_date_` + i + `" value="` + (row.date || '') + `" /></td>
+                <td>
+                  <select name="exp_category_` + i + `" style="width: 100%; padding: 5px;">
+                    <option value="">Select...</option>
+                    <option value="Feed"` + (row.category === 'Feed' ? ' selected' : '') + `>Feed</option>
+                    <option value="Health"` + (row.category === 'Health' ? ' selected' : '') + `>Health/Vet</option>
+                    <option value="Rent"` + (row.category === 'Rent' ? ' selected' : '') + `>Rent</option>
+                    <option value="Labor"` + (row.category === 'Labor' ? ' selected' : '') + `>Labor</option>
+                    <option value="Other"` + (row.category === 'Other' ? ' selected' : '') + `>Other</option>
+                  </select>
+                </td>
+                <td><input type="text" name="exp_desc_` + i + `" placeholder="e.g., Feed purchase" value="` + (row.description || '') + `" /></td>
+                <td><input type="number" name="exp_amount_` + i + `" min="0" step="0.01" value="` + (row.amount || '') + `" placeholder="0.00" /></td>
+                <td><input type="number" name="exp_feed_used_` + i + `" min="0" step="0.1" value="` + (row.feed_used || '') + `" placeholder="Optional" /></td>
+                <td><input type="number" name="exp_feed_store_` + i + `" min="0" step="0.1" value="` + (row.feed_in_store || '') + `" placeholder="Optional" /></td>
+                <td><input type="text" name="exp_notes_` + i + `" placeholder="Optional notes" value="` + (row.notes || '') + `" /></td>
+              </tr>
+            `;
+          }
+          
+          html += `
+              </tbody>
+            </table>
+            
+            <h4 style="color: #2c5f2d; margin-top: 30px;">📥 Bank Deposits (Money Saved)</h4>
+            <table class="expense-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Amount Deposited (Birr)</th>
+                  <th>Bank Reference #</th>
+                  <th>Depositor Name</th>
+                  <th>Notes/Remarks</th>
+                </tr>
+              </thead>
+              <tbody>
+          `;
+          
+          // Generate 5 deposit rows
+          for (let i = 0; i < 5; i++) {
+            const row = depositRows[i] || {};
+            html += `
+              <tr>
+                <td><input type="date" name="dep_date_${i}" value="${row.date || ''}" /></td>
+                <td><input type="number" name="dep_amount_${i}" min="0" step="0.01" value="${row.amount || ''}" placeholder="0.00" /></td>
+                <td><input type="text" name="dep_reference_${i}" placeholder="Ref# or confirmation" value="${row.reference || ''}" /></td>
+                <td><input type="text" name="dep_name_${i}" placeholder="Depositor name" value="${row.depositor_name || ''}" /></td>
+                <td><input type="text" name="dep_notes_${i}" placeholder="Optional notes" value="${row.notes || ''}" /></td>
+              </tr>
+            `;
+          }
+          
+          html += `
+              </tbody>
+            </table>
+            <p style="margin-top: 10px; color: #666; font-size: 0.9em;">💡 Tip: Only fill in rows you need. Empty rows will be ignored.</p>
+          `;
+          
+          return html;
+        },
+        button_label: 'Continue to Summary →',
+        on_finish: (data) => {
+          // Capture expenses
+          expenseRows = [];
+          for (let i = 0; i < 5; i++) {
+            const hasDate = data.response[`exp_date_${i}`];
+            const hasAmount = data.response[`exp_amount_${i}`] && Number(data.response[`exp_amount_${i}`]) > 0;
+            const hasCategory = data.response[`exp_category_${i}`];
+            const hasDescription = data.response[`exp_desc_${i}`];
+            
+            if (hasDate || hasAmount || hasCategory || hasDescription) {
+              expenseRows.push({
+                date: data.response[`exp_date_${i}`],
+                category: data.response[`exp_category_${i}`],
+                description: data.response[`exp_desc_${i}`],
+                amount: Number(data.response[`exp_amount_${i}`]) || 0,
+                feed_used: Number(data.response[`exp_feed_used_${i}`]) || 0,
+                feed_in_store: Number(data.response[`exp_feed_store_${i}`]) || 0,
+                notes: data.response[`exp_notes_${i}`]
+              });
+            }
+          }
+          
+          // Capture deposits
+          depositRows = [];
+          for (let i = 0; i < 5; i++) {
+            const hasDate = data.response[`dep_date_${i}`];
+            const hasAmount = data.response[`dep_amount_${i}`] && Number(data.response[`dep_amount_${i}`]) > 0;
+            const hasReference = data.response[`dep_reference_${i}`];
+            const hasName = data.response[`dep_name_${i}`];
+            
+            if (hasDate || hasAmount || hasReference || hasName) {
+              depositRows.push({
+                date: data.response[`dep_date_${i}`],
+                amount: Number(data.response[`dep_amount_${i}`]) || 0,
+                reference: data.response[`dep_reference_${i}`],
+                depositor_name: data.response[`dep_name_${i}`],
+                notes: data.response[`dep_notes_${i}`]
+              });
+            }
+          }
+          
+          saveDraft();
+          jsPsych.getDisplayElement().innerHTML = '';
+        }
+      });
+
+      // Save data to Google Sheets
+      timeline.push({
+        type: jsPsychCallFunction,
+        func: () => {
+          return new Promise(async resolve => {
+            const allData = jsPsych.data.get().values();
+            const projectInfo = allData.find(d => d.response?.project_name)?.response || {};
+            
+            const totalEggsLaid = weeklyData.reduce((sum, w) => sum + Number(w.eggs_laid || 0), 0);
+            const totalEggsSold = weeklyData.reduce((sum, w) => sum + Number(w.eggs_sold || 0), 0);
+            const totalBroken = weeklyData.reduce((sum, w) => sum + Number(w.eggs_broken || 0), 0);
+            const totalMortality = weeklyData.reduce((sum, w) => sum + Number(w.mortality || 0), 0);
+            const avgPercentLaying = weeklyData.reduce((sum, w) => sum + Number(w.percent_laying || 0), 0) / weeklyData.length;
+            const closingStock = weeklyData[weeklyData.length - 1]?.closing_stock || 0;
+            
+            const totalRevenue = weeklyData.reduce((sum, w) => sum + Number(w.revenue || 0), 0);
+            const totalExpenses = expenseRows.reduce((sum, e) => sum + Number(e.amount || 0), 0);
+            const totalDeposits = depositRows.reduce((sum, d) => sum + Number(d.amount || 0), 0);
+            const profitLoss = totalRevenue - totalExpenses;
+            const costPerEgg = totalEggsLaid > 0 ? (totalExpenses / totalEggsLaid).toFixed(3) : 0;
+            
+            const dataPackage = {
+              projectInfo,
+              weeklyData,
+              monthlySummary: {
+                totalEggsLaid,
+                totalEggsSold,
+                totalBroken,
+                totalMortality,
+                avgPercentLaying: avgPercentLaying.toFixed(2),
+                closingStock,
+                totalRevenue: totalRevenue.toFixed(2),
+                totalExpenses: totalExpenses.toFixed(2),
+                totalDeposits: totalDeposits.toFixed(2),
+                profitLoss: profitLoss.toFixed(2),
+                costPerEgg
+              },
+              expenseData: expenseRows,
+              depositData: depositRows,
+              timestamp: new Date().toISOString()
+            };
+
+            try {
+              const result = await saveToGoogleSheets(dataPackage);
+              if (result.success) {
+                clearDraft();
+              }
+            } catch (e) {
+              console.error(e);
+            }
+            resolve();
+          });
+        }
+      });
+      
+      // Final summary and completion screen
+      timeline.push({
+        type: jsPsychHtmlButtonResponse,
+        stimulus: () => {
+          const allData = jsPsych.data.get().values();
+          const projectInfo = allData.find(d => d.response?.project_name)?.response || {};
+          
+          const totalEggsLaid = weeklyData.reduce((sum, w) => sum + Number(w.eggs_laid || 0), 0);
+          const totalEggsSold = weeklyData.reduce((sum, w) => sum + Number(w.eggs_sold || 0), 0);
+          const totalBroken = weeklyData.reduce((sum, w) => sum + Number(w.eggs_broken || 0), 0);
+          const totalMortality = weeklyData.reduce((sum, w) => sum + Number(w.mortality || 0), 0);
+          const avgPercentLaying = weeklyData.reduce((sum, w) => sum + Number(w.percent_laying || 0), 0) / weeklyData.length;
+          const closingStock = weeklyData[weeklyData.length - 1]?.closing_stock || 0;
+          const openingStock = Number(projectInfo.opening_stock) || 0;
+          
+          const totalRevenue = weeklyData.reduce((sum, w) => sum + Number(w.revenue || 0), 0);
+          const totalExpenses = expenseRows.reduce((sum, e) => sum + Number(e.amount || 0), 0);
+          const totalDeposits = depositRows.reduce((sum, d) => sum + Number(d.amount || 0), 0);
+          const profitLoss = totalRevenue - totalExpenses;
+          const costPerEgg = totalEggsLaid > 0 ? (totalExpenses / totalEggsLaid).toFixed(3) : 0;
+          
+          // Calculate total feed used and latest feed in store
+          const totalFeedUsed = expenseRows.reduce((sum, e) => sum + Number(e.feed_used || 0), 0);
+          const latestFeedInStore = expenseRows.filter(e => e.feed_in_store > 0).slice(-1)[0]?.feed_in_store || 0;
+          
+          return `
+            <div class="welcome-card">
+              <h2>✅ Report Submitted Successfully!</h2>
+              <p><strong>Project:</strong> ${projectInfo.project_name}</p>
+              <p><strong>Period:</strong> ${projectInfo.month_year}</p>
+              
+              <div class="summary-box">
+                <h4>📊 Monthly Summary</h4>
+                <table class="summary-table">
+                  <tr><td>Opening Stock (Start of Month):</td><td><strong>${openingStock} eggs</strong></td></tr>
+                  <tr><td>Total Eggs Laid:</td><td><strong>${totalEggsLaid}</strong></td></tr>
+                  <tr><td>Total Eggs Sold:</td><td><strong>${totalEggsSold}</strong></td></tr>
+                  <tr><td>Total Broken:</td><td><strong>${totalBroken}</strong></td></tr>
+                  <tr style="border-top: 2px solid #2c5f2d;"><td>Closing Stock (End of Month):</td><td><strong style="color: #2c5f2d; font-size: 1.1em;">${closingStock} eggs</strong></td></tr>
+                  <tr><td>Average % Laying:</td><td><strong>${avgPercentLaying.toFixed(2)}%</strong></td></tr>
+                  <tr><td>Total Mortality:</td><td><strong>${totalMortality} hens</strong></td></tr>
+                  <tr style="border-top: 2px solid #2c5f2d;"><td>Total Revenue:</td><td><strong>Birr ${totalRevenue.toFixed(2)}</strong></td></tr>
+                  <tr><td>Total Expenses:</td><td><strong>Birr ${totalExpenses.toFixed(2)}</strong></td></tr>
+                  <tr style="border-top: 2px solid #2c5f2d;"><td>Profit/Loss:</td><td><strong style="color: ${profitLoss >= 0 ? '#2c5f2d' : '#dc3545'}">Birr ${profitLoss.toFixed(2)}</strong></td></tr>
+                  <tr><td>Production Cost per Egg:</td><td><strong>Birr ${costPerEgg}</strong></td></tr>
+                  <tr style="border-top: 2px solid #2c5f2d;"><td>Total Feed Used:</td><td><strong>${totalFeedUsed.toFixed(1)} kg</strong></td></tr>
+                  <tr><td>Feed in Store (Current):</td><td><strong style="color: #2c5f2d;">${latestFeedInStore.toFixed(1)} kg</strong></td></tr>
+                </table>
+              </div>
+              
+              <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 5px; border-left: 4px solid #ffc107;">
+                <strong>📦 For Next Month:</strong> Use <strong>${closingStock} eggs</strong> as opening stock
+              </div>
+              
+              <div style="margin-top: 20px; padding: 15px; background: #e3f2fd; border-radius: 5px;">
+                <strong>✅ Data saved successfully</strong><br>
+                <small>${new Date().toLocaleString()}</small>
+              </div>
+            </div>
+          `;
+        },
+        choices: ['📥 Export to CSV', '🔄 Start New Report', '✔️ Done'],
+        on_finish: (data) => {
+          if (data.response === 0) {
+            exportToCSV();
+          } else if (data.response === 1) {
+            clearDraft();
+            window.location.reload();
+          } else {
+            jsPsych.endExperiment('<div class="welcome-card"><h2>Thank you!</h2><p>You may close this window.</p></div>');
+          }
+        }
+      });
+      
+      return timeline;
+    }
+    
+    function runExperiment() {
+      jsPsych.run(createTimeline());
+    }
+    runExperiment();
+  </script>
+</body>
+</html>
