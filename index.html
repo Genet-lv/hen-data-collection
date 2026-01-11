@@ -357,13 +357,15 @@
 
     async function saveToGoogleSheets(projectData) {
       try {
-        await fetch(GOOGLE_SCRIPT_URL, {
+        const response = await fetch(GOOGLE_SCRIPT_URL, {
           method: 'POST',
-          mode: 'no-cors',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(projectData)
         });
-        return { success: true, message: "Data saved successfully to Google Sheets!" };
+        
+        const result = await response.json();
+        console.log('Save result:', result);
+        return result;
       } catch (e) {
         console.error("Save error:", e);
         return { success: false, message: e.message };
